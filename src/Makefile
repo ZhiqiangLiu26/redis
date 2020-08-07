@@ -139,7 +139,7 @@ ifeq ($(uname_S),NetBSD)
 else
 	# All the other OSes (notably Linux)
 	FINAL_LDFLAGS+= -rdynamic
-	FINAL_LIBS+=-ldl -pthread -lrt
+	FINAL_LIBS+=-ldl -pthread -lrt -luring
 endif
 endif
 endif

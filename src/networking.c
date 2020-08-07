@@ -969,6 +969,13 @@ void acceptTcpHandler(aeEventLoop *el, int fd, void *privdata, int mask) {
             if (errno != EWOULDBLOCK)
                 serverLog(LL_WARNING,
                     "Accepting client connection: %s", server.neterr);
+
+#ifdef HAVE_IO_URING
+            if (aeCreateFileEvent(el, fd, AE_READABLE, acceptTcpHandler, NULL) == AE_ERR) {
+		serverPanic("Unrecoverable error creating server.ipfd file event.");
+	    }
+#endif
+
             return;
         }
         serverLog(LL_VERBOSE,"Accepted %s:%d", cip, cport);
@@ -989,6 +996,12 @@ void acceptTLSHandler(aeEventLoop *el, int fd, void *privdata, int mask) {
             if (errno != EWOULDBLOCK)
                 serverLog(LL_WARNING,
                     "Accepting client connection: %s", server.neterr);
+#ifdef HAVE_IO_URING
+            if (aeCreateFileEvent(el, fd, AE_READABLE, acceptTcpHandler, NULL) == AE_ERR) {
+		serverPanic("Unrecoverable error creating server.ipfd file event.");
+	    }
+#endif
+
             return;
         }
         serverLog(LL_VERBOSE,"Accepted %s:%d", cip, cport);
@@ -1008,6 +1021,13 @@ void acceptUnixHandler(aeEventLoop *el, int fd, void *privdata, int mask) {
             if (errno != EWOULDBLOCK)
                 serverLog(LL_WARNING,
                     "Accepting client connection: %s", server.neterr);
+
+#ifdef HAVE_IO_URING
+            if (aeCreateFileEvent(el, fd, AE_READABLE, acceptTcpHandler, NULL) == AE_ERR) {
+		serverPanic("Unrecoverable error creating server.ipfd file event.");
+	    }
+#endif
+
             return;
         }
         serverLog(LL_VERBOSE,"Accepted connection to %s", server.unixsocket);
@@ -1960,6 +1980,14 @@ void readQueryFromClient(connection *conn) {
     /* There is more data in the client input buffer, continue parsing it
      * in case to check if there is a full command to execute. */
      processInputBuffer(c);
+
+    if (c->flags & CLIENT_CLOSE_AFTER_REPLY) return;  
+
+#ifdef HAVE_IO_URING
+    if (aeCreateFileEvent(server.el, conn->fd, AE_READABLE, conn->type->ae_handler, conn) == AE_ERR) {
+        serverPanic("Unrecoverable error creating conn.fd file event.");
+    }
+#endif
 }
 
 void getClientsMaxBuffers(unsigned long *longest_output_list,
