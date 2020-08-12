@@ -1531,7 +1531,7 @@ int clientsCronResizeQueryBuffer(client *c) {
     {
         /* Only resize the query buffer if it is actually wasting
          * at least a few kbytes. */
-        if (sdsavail(c->querybuf) > 1024*4) {
+        if (sdsavail(c->querybuf) > 1024*4 && !c->submitted_query) {
             c->querybuf = sdsRemoveFreeSpace(c->querybuf);
         }
     }
