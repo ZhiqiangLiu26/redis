@@ -2886,6 +2886,7 @@ void initServer(void) {
     /* Create an event handler for accepting new connections in TCP and Unix
      * domain sockets. */
     for (j = 0; j < server.ipfd_count; j++) {
+        aeRegisterFile(server.el, server.ipfd[j]);
         if (aeCreateFileEvent(server.el, server.ipfd[j], AE_READABLE,
             acceptTcpHandler,NULL) == AE_ERR)
             {
@@ -2894,6 +2895,7 @@ void initServer(void) {
             }
     }
     for (j = 0; j < server.tlsfd_count; j++) {
+        aeRegisterFile(server.el, server.tlsfd[j]);
         if (aeCreateFileEvent(server.el, server.tlsfd[j], AE_READABLE,
             acceptTLSHandler,NULL) == AE_ERR)
             {
@@ -2907,6 +2909,7 @@ void initServer(void) {
 
     /* Register a readable event for the pipe used to awake the event loop
      * when a blocked client in a module needs attention. */
+    aeRegisterFile(server.el, server.module_blocked_pipe[0]);
     if (aeCreateFileEvent(server.el, server.module_blocked_pipe[0], AE_READABLE,
         moduleBlockedClientPipeReadable,NULL) == AE_ERR) {
             serverPanic(

@@ -995,6 +995,7 @@ void acceptTcpHandler(aeEventLoop *el, int fd, void *privdata, int mask) {
             return;
         }
         serverLog(LL_VERBOSE,"Accepted %s:%d", cip, cport);
+        aeRegisterFile(el, cfd);
         acceptCommonHandler(connCreateAcceptedSocket(cfd),0,cip);
     }
 }
@@ -1021,6 +1022,7 @@ void acceptTLSHandler(aeEventLoop *el, int fd, void *privdata, int mask) {
             return;
         }
         serverLog(LL_VERBOSE,"Accepted %s:%d", cip, cport);
+        aeRegisterFile(el, cfd);
         acceptCommonHandler(connCreateAcceptedTLS(cfd, server.tls_auth_clients),0,cip);
     }
 }
@@ -1047,6 +1049,7 @@ void acceptUnixHandler(aeEventLoop *el, int fd, void *privdata, int mask) {
             return;
         }
         serverLog(LL_VERBOSE,"Accepted connection to %s", server.unixsocket);
+        aeRegisterFile(el, cfd);
         acceptCommonHandler(connCreateAcceptedSocket(cfd),CLIENT_UNIX_SOCKET,NULL);
     }
 }
