@@ -776,6 +776,7 @@ typedef struct client {
     robj *name;             /* As set by CLIENT SETNAME. */
     sds querybuf;           /* Buffer we use to accumulate client queries. */
     struct iovec riov;
+    struct iovec wiov;
     int submitted_query;
     size_t qblen;
     size_t qb_pos;          /* The position we have read in querybuf. */
@@ -797,6 +798,7 @@ typedef struct client {
     unsigned long long reply_bytes; /* Tot bytes of objects in reply list. */
     size_t sentlen;         /* Amount of bytes already sent in the current
                                buffer or object being sent. */
+    size_t totwritten;
     time_t ctime;           /* Client creation time. */
     time_t lastinteraction; /* Time of the last interaction, used for timeout */
     time_t obuf_soft_limit_reached_time;
@@ -1624,6 +1626,7 @@ void acceptUnixHandler(aeEventLoop *el, int fd, void *privdata, int mask);
 void readQueryFromClient(connection *conn);
 #if defined(HAVE_IO_URING)
 void readDoneFromClient(connection *conn);
+void writeDoneToClient(connection *conn);
 #endif
 void addReplyNull(client *c);
 void addReplyNullArray(client *c);
